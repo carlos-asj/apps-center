@@ -1,0 +1,8 @@
+services:
+  database:
+    container_name: "mongo_dev"
+    image: "mongo:latest"
+    env_file:
+      - "../.env"
+    ports:
+      - "5555:5555"

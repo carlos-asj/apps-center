@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "dev": "nodemon ./server.js --watch",
+    "start": "node ./server.js"
+  },
+  "dependencies": {
+    "babel": "^5.8.38",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "joi": "^18.0.2",
+    "mongoose": "^9.0.2",
+    "nodemon": "^3.1.11"
+  }
+}
