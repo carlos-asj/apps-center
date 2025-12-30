@@ -12,10 +12,9 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
-
 app.use(express.json()); // basically convert things to json
 
-const connectDB = async () => {
+const connectMongoDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("Connected to MongoDB");
@@ -24,7 +23,7 @@ const connectDB = async () => {
   }
 };
 
-connectDB();
+connectMongoDB();
 
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
@@ -77,10 +76,6 @@ app.get("/health/postgres", async (req, res) => {
       status: "unhealthy"
     });
   }
-
-  
-
-  
 });
 
 // CREATE
