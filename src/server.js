@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import Users from "./infra/models/user/Users.js";
+import usersRoute from "./routes/user/users.js";
 import { createUserController } from "./infra/services/controllers/userController.js";
 import { userValidation } from "./infra/validator/userValidator.js";
 import login from "./infra/services/login/userLogin.js";
@@ -82,47 +83,49 @@ app.get("/health/postgres", async (req, res) => {
 app.post("/users", userValidation, createUserController);
 
 // READ
-app.get("/users", async (req, res) => {
-  try {
-    const allUsers = await Users.find();
-    res.json(allUsers);
-  } catch (error) {
-    res.json({ error: error });
-  }
-});
+// app.get("/users", async (req, res) => {
+//   try {
+//     const allUsers = await Users.find();
+//     res.json(allUsers);
+//   } catch (error) {
+//     res.json({ error: error });
+//   }
+// });
+
+app.use('/users', usersRoute);
 
 // UPDATE
-app.put("/users/:id", async (req, res) => {
-  try {
-    const emailData = req.body.email;
+// app.put("/users/:id", async (req, res) => {
+//   try {
+//     const emailData = req.body.email;
 
-    if (!emailData || !emailData.includes("@")) {
-      console.log("E-mail incorreto!");
-      return res.status(400).json({
-        error: "E-mail incorreto!"
-      })
-    }
+//     if (!emailData || !emailData.includes("@")) {
+//       console.log("E-mail incorreto!");
+//       return res.status(400).json({
+//         error: "E-mail incorreto!"
+//       })
+//     }
 
-    const udpateUser = await Users.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    res.status(201).json(udpateUser);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
+//     const udpateUser = await Users.findByIdAndUpdate(req.params.id, req.body, {
+//       new: true,
+//     });
+//     res.status(201).json(udpateUser);
+//   } catch (error) {
+//     res.status(400).json({ error: error.message });
+//   }
+// });
 
-app.post("/users/login", login)
+// app.post("/users/login", login)
 
-// DELETE
-app.delete("/users/:id", async (req, res) => {
-  try {
+// // DELETE
+// app.delete("/users/:id", async (req, res) => {
+//   try {
     
 
-  } catch (error) {
-    res.status(400).json({ error: error.message })
-  }
-})
+//   } catch (error) {
+//     res.status(400).json({ error: error.message })
+//   }
+// })
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
