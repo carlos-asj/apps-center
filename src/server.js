@@ -7,12 +7,24 @@ import { createUserController } from "./infra/services/controllers/userControlle
 import { userValidation } from "./infra/validator/userValidator.js";
 import login from "./infra/services/login/userLogin.js";
 import database from "./infra/postgres/database.js"
+import cors from "cors";
+import helmet from "helmet";
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
 
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      connectSrc: ["'self'", "http://localhost:*"],
+    },
+  },
+}));
+
+app.use(cors());
 app.use(express.json()); // basically convert things to json
 
 const connectMongoDB = async () => {
@@ -93,6 +105,11 @@ app.post("/users", userValidation, createUserController);
 // });
 
 app.use('/users', usersRoute);
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Somethign went wrong!" });
+});
 
 // UPDATE
 // app.put("/users/:id", async (req, res) => {
