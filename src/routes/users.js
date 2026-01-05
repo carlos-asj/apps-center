@@ -1,8 +1,8 @@
 import express from "express";
-const router = express.Router();
-import Users from "../../infra/models/user/Users.js"
+const userRoutes = express.Router();
+import Users from "../infra/models/user/Users.js"
 
-router.get('/', async (req, res) => {
+userRoutes.get('/', async (req, res) => {
     try {
         const allUsers = await Users.find();
         res.json(allUsers)
@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/:id', async (req, res) => {
+userRoutes.get('/:id', async (req, res) => {
     try {
         const user = await Users.findById(req.params.id);
         if (!user) {
@@ -23,4 +23,4 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-export default router;
+export default userRoutes;

@@ -1,8 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import Users from "./infra/models/user/Users.js";
-import usersRoute from "./routes/user/users.js";
+import usersRoute from "./routes/users.js";
 import { createUserController } from "./infra/services/controllers/userController.js";
 import { userValidation } from "./infra/validator/userValidator.js";
 import login from "./infra/services/login/userLogin.js";
@@ -93,16 +92,6 @@ app.get("/health/postgres", async (req, res) => {
 
 // CREATE
 app.post("/users", userValidation, createUserController);
-
-// READ
-// app.get("/users", async (req, res) => {
-//   try {
-//     const allUsers = await Users.find();
-//     res.json(allUsers);
-//   } catch (error) {
-//     res.json({ error: error });
-//   }
-// });
 
 app.use('/users', usersRoute);
 
