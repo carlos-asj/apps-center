@@ -1,9 +1,6 @@
 const jestConfig = {
   moduleDirectories: ["node_modules", "<rootDir>"],
-  verbose: true,
-  transform: {
-    "\\.[jt]sx?$": "babel-jest",
-  },
+  verbose: true
 };
 
 module.exports = jestConfig;
