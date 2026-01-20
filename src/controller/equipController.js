@@ -21,10 +21,11 @@ export const getAllEquip = async (req, res) => {
 };
 
 export const getEquipId = async (req, res) => {
-    const equipId = req.params.id;
+    const equipId = req.params.equip_id;
+    console.log('equipId:', equipId)
     try {
-        const equip = EquipModel.findOne({
-            where: { id: equipId }
+        const equip = await EquipModel.findOne({
+            where: { equip_id: equipId }
         });
 
         if (!equip) {
@@ -33,7 +34,9 @@ export const getEquipId = async (req, res) => {
             });
         };
 
-        return res.status(200).json({ equip });
+        return res.status(200).json({
+            equipamento: equip
+        });
     } catch (error) {
         console.error(error);
         return res.status(500).json({
@@ -91,3 +94,52 @@ export const addEquip = async (req, res) => {
         });
     };
 };
+
+export const updateEquip = async (req, res) => {
+    let equip_id = req.params.equip_id;
+    try {
+        const equip = await EquipModel.update(req.body,{
+             where: { equip_id }});
+
+        const resEquip = await EquipModel.findOne({
+            where: { equip_id }}
+        );
+
+        return res.status(200).json({
+            message: "Equipamento atualizado com sucesso",
+            equipamento: resEquip.name
+        });
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    };
+};
+
+export const deleteEquip = async (req, res) => {
+    let equip_id = req.params.equip_id;
+    try {
+        const equip =  await EquipModel.findOne({
+            where: { equip_id: equip_id }
+        });
+
+        if (equip == null) {
+            return res.status(404).json({
+                message: "Equipamento não encontrado"
+            });
+        }
+
+        await equip.destroy();
+        return res.status(200).json({
+            message: "Equipamento deletado"
+        })
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    };
+}

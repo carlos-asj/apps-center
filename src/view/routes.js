@@ -1,10 +1,15 @@
 import express from "express";
-import { addEquip, getAllEquip, getEquipId } from "../controller/equipController.js";
+import { addEquip, getAllEquip, getEquipId, updateEquip, deleteEquip } from "../controller/equipController.js";
 
 const router = express.Router();
 
 router.get("/equips", getAllEquip);
-router.get("/equips/:id", getEquipId);
-router.post("/equip", addEquip)
+router.get("/equips/:equip_id", getEquipId);
+
+router.post("/equip", addEquip);
+
+router.put("/equip/:equip_id", updateEquip);
+
+router.delete("/equip/:equip_id", deleteEquip);
 
 export default router;
