@@ -5,7 +5,8 @@ export const createEquipModel = async (sequelize) => {
   const Equip = sequelize.define('equipamentos', {
     equip_id: {
         type: DataTypes.BIGINT,
-        primaryKey: true
+        primaryKey: true,
+        autoIncrement: true
     },
     name: {
       type: DataTypes.STRING,
@@ -34,6 +35,14 @@ export const createEquipModel = async (sequelize) => {
     senha: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    link_rtsp: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    NS: {
+      type: DataTypes.STRING,
+      allowNull: false
     }
   });
 

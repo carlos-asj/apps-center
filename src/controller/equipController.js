@@ -10,7 +10,7 @@ export const getAllEquip = async (req, res) => {
             });
         };
 
-        return res.status(200).json({equips});
+        return res.status(200).json({ equips });
     } catch (error) {
         console.error(error);
 
@@ -42,6 +42,17 @@ export const getEquipId = async (req, res) => {
     };
 };
 
+async function gerar_linkrtsp (usuario, senha, publico, rtsp) {
+    try {
+        const link_rtsp = `rtsp://${usuario}:${senha}@${publico}:${rtsp}/cam/realmonitor?channel=1&subtype=0`
+        return link_rtsp;
+
+    } catch (error) {
+        console.error(error);
+        return null;
+    };
+};
+
 export const addEquip = async (req, res) => {
     const equipObj = req.body;
 
@@ -57,26 +68,20 @@ export const addEquip = async (req, res) => {
             });
         };
 
-        const link_rtsp = `rtsp://${equipObj.usuario}:${equipObj.senha}@${equipObj.publico}:${equipObj.rtsp}/cam/realmonitor?channel=1&subtype=0`
-
+        const link_rtsp = await gerar_linkrtsp(equipObj.usuario, equipObj.senha, equipObj.publico, equipObj.rtsp);
+        
         const equipCompleto = {
             ...equipObj,
             link_rtsp: link_rtsp
         };
+
+        const { equip_id, ...equipBanco } = equipCompleto;
         
-        const equipBanco = { ...equipCompleto };
-        delete equipBanco.equip_id;
+        const equipCriado = await EquipModel.create(equipBanco);
 
-        console.log('equipBanco:', equipBanco)
-        const equipCriado = await EquipModel.create(equipBanco, {
-            fields: [
-                'name', 'http', 'rtsp', 'publico', 'mac', 'usuario', 'senha', 'link_rtsp', 'NS'
-            ] // isso serve para retirar o campo 'equip_id' do INSERT
-        });
-
+        console.log('equipamento:', equipBanco, '\nequipCriado:', equipCriado);
         return res.status(201).json({
-            message: "Equipamento criado!",
-            equip: equipCriado
+            message: "Equipamento criado!"
         });
 
     } catch (error) {
