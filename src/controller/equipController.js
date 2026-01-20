@@ -1,4 +1,6 @@
 import { EquipModel } from "../infra/database.js";
+import fs from 'fs';
+import path from 'path';
 
 export const getAllEquip = async (req, res) => {
     try {
@@ -58,6 +60,7 @@ async function gerar_linkrtsp (usuario, senha, publico, rtsp) {
 
 export const addEquip = async (req, res) => {
     const equipObj = req.body;
+    const imagem = req.file;
 
     try {
         const equipExistente = await EquipModel.findOne({
@@ -65,6 +68,11 @@ export const addEquip = async (req, res) => {
         });
 
         if (equipExistente) {
+
+            if (imagem) {
+                fs.unlinkSync(imagem.path);
+            }
+
             return res.status(200).json({
                 message: "Equipamento já existe",
                 NS: equipObj.NS
@@ -78,16 +86,26 @@ export const addEquip = async (req, res) => {
             link_rtsp: link_rtsp
         };
 
+        if (imagem) {
+            equipCompleto.imagem_url = `/uploads/equipamentos/${imagem.filename}`;
+            equipCompleto.imagem_nome = imagem.originalname;
+            equipCompleto.imagem_tamanho = imagem.size;
+            equipCompleto.imagem_mimetype = imagem.mimetype;
+        }
+
         const { equip_id, ...equipBanco } = equipCompleto;
         
         const equipCriado = await EquipModel.create(equipBanco);
 
-        console.log('equipamento:', equipBanco, '\nequipCriado:', equipCriado);
         return res.status(201).json({
             message: "Equipamento criado!"
         });
 
     } catch (error) {
+        if (imagem) {
+            fs.unlinkSync(imagem.path);
+        }
+        
         console.error(error);
         return res.status(500).json({
             message: "Internal server error"
