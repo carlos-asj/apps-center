@@ -1,6 +1,4 @@
 import { EquipModel } from "../infra/database.js";
-import fs from 'fs';
-import path from 'path';
 
 export const getAllEquip = async (req, res) => {
     try {
@@ -60,7 +58,6 @@ async function gerar_linkrtsp (usuario, senha, publico, rtsp) {
 
 export const addEquip = async (req, res) => {
     const equipObj = req.body;
-    const imagem = req.file;
 
     try {
         const equipExistente = await EquipModel.findOne({
@@ -68,10 +65,6 @@ export const addEquip = async (req, res) => {
         });
 
         if (equipExistente) {
-
-            if (imagem) {
-                fs.unlinkSync(imagem.path);
-            }
 
             return res.status(200).json({
                 message: "Equipamento já existe",
@@ -84,13 +77,6 @@ export const addEquip = async (req, res) => {
         const equipCompleto = {
             ...equipObj,
             link_rtsp: link_rtsp
-        };
-
-        if (imagem) {
-            equipCompleto.imagem_url = `/uploads/equipamentos/${imagem.filename}`;
-            equipCompleto.imagem_nome = imagem.originalname;
-            equipCompleto.imagem_tamanho = imagem.size;
-            equipCompleto.imagem_mimetype = imagem.mimetype;
         }
 
         const { equip_id, ...equipBanco } = equipCompleto;
@@ -98,13 +84,11 @@ export const addEquip = async (req, res) => {
         const equipCriado = await EquipModel.create(equipBanco);
 
         return res.status(201).json({
-            message: "Equipamento criado!"
+            message: "Equipamento criado!",
+            equip: equipBanco
         });
 
     } catch (error) {
-        if (imagem) {
-            fs.unlinkSync(imagem.path);
-        }
         
         console.error(error);
         return res.status(500).json({

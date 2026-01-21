@@ -39,22 +39,6 @@ export const createEquipModel = async (sequelize) => {
     NS: {
       type: DataTypes.STRING,
       allowNull: false
-    },
-    imagem_url: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    imagem_nome: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    imagem_mimetype: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    thumbnail_url: {
-      type: DataTypes.STRING,
-      allowNull: true
     }
   });
 
