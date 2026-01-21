@@ -1,4 +1,4 @@
-import { EquipModel } from "../infra/database.js";
+import { EquipModel, ClientesModel } from "../infra/database.js";
 
 export const getAllEquip = async (req, res) => {
     try {
@@ -145,3 +145,22 @@ export const deleteEquip = async (req, res) => {
         });
     };
 }
+
+export const addCliente = async (req, res) => {
+    const clienteObj = req.body;
+
+    try {
+        const clienteCriado = await ClientesModel.create(clienteObj);
+
+        return res.status(201).json({
+            message: "Cliente criado!",
+            cliente: clienteCriado
+        })
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    };
+};

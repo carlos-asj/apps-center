@@ -4,9 +4,9 @@ export const createEquipModel = async (sequelize) => {
   
   const Equip = sequelize.define('equipamentos', {
     equip_id: {
-        type: DataTypes.BIGINT,
-        primaryKey: true,
-        autoIncrement: true
+      type: DataTypes.BIGINT,
+      primaryKey: true,
+      autoIncrement: true
     },
     name: {
       type: DataTypes.STRING,
@@ -43,5 +43,29 @@ export const createEquipModel = async (sequelize) => {
   });
 
   return Equip;
+};
 
+export const createClientesModel = async (sequelize) => {
+  const Clientes = sequelize.define('clientes', {
+    cliente_id: {
+        type: DataTypes.BIGINT,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    localizacao: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    categoria: {
+      type: DataTypes.ENUM('App', 'Torre', 'PegLev', 'Outro'),
+      defaultValue: 'Nenhum',
+      allowNull: false,
+    }
+  });
+
+  return Clientes;
 };
