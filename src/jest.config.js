@@ -1,6 +1,6 @@
 const jestConfig = {
   moduleDirectories: ["node_modules", "<rootDir>"],
-  verbose: true
+  verbose: true,
 };
 
 module.exports = jestConfig;

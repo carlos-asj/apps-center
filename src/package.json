@@ -3,7 +3,9 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "lint:prettier:check": "prettier --check .",
+    "lint:prettier:fix": "prettier --write ."
   },
   "dependencies": {
     "dotenv": "^17.2.3",
