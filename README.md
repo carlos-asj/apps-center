@@ -1,2 +1,2 @@
 # apps-center
-A application to center informations about APP AYEL.
+Aplicação para centralizar informações de um aplicativo
