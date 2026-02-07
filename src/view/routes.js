@@ -1,26 +1,24 @@
 import express from "express";
 import {
+  addClient,
+  getAllClients,
+  getClient,
   addEquip,
   getAllEquip,
   getEquipId,
   updateEquip,
   deleteEquip,
-} from "../controller/equipController.js";
-import {
-  addCliente,
-  getAllClientes,
-  getCliente,
-} from "../controller/clientesController.js";
+} from "../controller/controller.js";
 
 const router = express.Router();
 
 router.get("/equips", getAllEquip);
 router.get("/equips/:equip_id", getEquipId);
-router.get("/clientes", getAllClientes);
-router.get("/clientes/:cliente_id", getCliente);
+router.get("/clients", getAllClients);
+router.get("/clients/:client_id", getClient);
 
-router.post("/equip", addEquip);
-router.post("/cliente", addCliente);
+router.post("/equips", addEquip);
+router.post("/clients", addClient);
 
 router.put("/equip/:equip_id", updateEquip);
 

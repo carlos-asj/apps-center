@@ -1,6 +1,5 @@
 import express from "express";
 import "dotenv/config";
-import { connection } from "./infra/database.js";
 import router from "./view/routes.js";
 
 const PORT = process.env.PORT;
