@@ -1,111 +1,55 @@
-// models-v2/index.js - NOVO SISTEMA
+// src/models/index.js
 import { Sequelize } from 'sequelize';
 import { config } from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+import Client from './Client.js';
+import Equip from './Equip.js';
 
 config();
 
-export const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT),
-    dialect: 'postgres',
-    logging: console.log,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    },
-    define: {
-      timestamps: true,
-      underscored: true,
-      freezeTableName: true
+export async function setupDatabase() {
+  const sequelize = new Sequelize(
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
+    {
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      dialect: 'postgres',
+      logging: process.env.NODE_ENV === 'development' ? console.log : false,
+      pool: {
+        max: 10,
+        min: 0,
+        acquire: 30000,
+        idle: 10000
+      },
+      define: {
+        underscored: true,
+        timestamps: true
+      }
     }
-  }
-);
+  );
 
-export const Client = sequelize.define('Client', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  name: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
-  cpf_cnpj: {
-    type: Sequelize.STRING,
-    allowNull: false,
-    unique: true
-  }
-}, {
-  tableName: 'clients',
-  timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
-  validate: false
-});
+  // Inicializar modelos
+  Client.init(sequelize);
+  Equip.init(sequelize);
 
-export const Equip = sequelize.define('Equip', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  name: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
-  serial_num: {
-    type: Sequelize.STRING,
-    allowNull: false,
-    unique: true
-  },
-  client_id: {
-    type: Sequelize.INTEGER,
-    allowNull: false
-  }
-}, {
-  tableName: 'equips',
-  timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
-  validate: false
-});
+  // Definir associações
+  Client.associate({ Equip });
+  Equip.associate({ Client });
 
-Client.hasMany(Equip, {
-  foreignKey: 'client_id',
-  as: 'equips'
-});
-
-Equip.belongsTo(Client, {
-  foreignKey: 'client_id',
-  as: 'client'
-});
-
-export async function initDatabase() {
   try {
     await sequelize.authenticate();
-    console.log('✅ Conexão com PostgreSQL estabelecida');
+    console.log('PostgreSQL connection established');
     
-    // Sincronizar sem forçar
-    await sequelize.sync({ 
-      force: false,
-      alter: false,
-      logging: console.log
-    });
+    await sequelize.sync({ force: false, alter: true });
+    console.log('Models sync with db');
     
-    console.log('✅ Tabelas sincronizadas');
-    return true;
-    
+    return sequelize;
   } catch (error) {
-    console.error('❌ Erro na inicialização:', error.message);
+    console.error('Error to db sync:', error.message);
     throw error;
   }
-};
+}
+
+// Exportar modelos para uso em outros arquivos
+export { Client, Equip };

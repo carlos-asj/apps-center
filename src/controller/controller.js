@@ -125,7 +125,7 @@ export const getAllEquip = async (req, res) => {
 
     if (equips.length == 0) {
       return res.status(200).json({
-        message: "Sem equipamentos cadastrados",
+        message: "None equipments found",
       });
     }
 
