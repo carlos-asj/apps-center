@@ -240,8 +240,6 @@ export const status = async (req, res) => {
     "SHOW max_connections;",
   );
 
-  console.log("DB name: ", databaseName);
-
   const databaseMaxConnectionsValue =
     databaseMaxConnectionsResult.rows[0].max_connections;
 
