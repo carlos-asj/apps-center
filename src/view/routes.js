@@ -8,7 +8,8 @@ import {
   getEquipId,
   updateEquip,
   deleteEquip,
-} from "../controller/controller.js";
+  status
+} from "./controller/controller.js";
 
 const router = express.Router();
 
@@ -23,5 +24,7 @@ router.post("/clients", addClient);
 router.put("/equip/:equip_id", updateEquip);
 
 router.delete("/equip/:equip_id", deleteEquip);
+
+router.get("/status", status);
 
 export default router;
