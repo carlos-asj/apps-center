@@ -11,12 +11,12 @@ try {
           cpf_cnpj VARCHAR(18) UNIQUE NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`
+        );`
       );
   console.log("Table clients created");
 
   const equipsTable = await database.query(`
-    CREATE TABLE IF NOT EXISTS clients (
+    CREATE TABLE IF NOT EXISTS equips (
           id SERIAL PRIMARY KEY,
           name VARCHAR(100) NOT NULL,
           serial_num VARCHAR(255) UNIQUE NOT NULL,
@@ -26,7 +26,7 @@ try {
           CONSTRAINT fk_client
             FOREIGN KEY (client_id) 
             REFERENCES clients(id)
-        )`
+        );`
       );
   console.log("Table equips created");
 
@@ -37,10 +37,12 @@ try {
   console.log("Index created");
 
   const clients = await database.query(`
-    SELECT * FROM clients as clients;
+    SELECT * FROM clients;
   `);
 
   console.log("Clients: ", clients.rows);
+  console.log("Clients: ", clientsTable.rows);
+  console.log("Equips: ", equipsTable.rows)
 
 } catch (error) {
   console.error("error creating tables.", error);

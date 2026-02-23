@@ -1,4 +1,4 @@
-import { Client, Equip } from "../../infra/model/index.js";
+
 import database from "../../infra/dbConnectPsql.js";
 
 export const addClient = async (req, res) => {
@@ -8,22 +8,21 @@ export const addClient = async (req, res) => {
   
     if (!name || name.length < 3) {
       return res.status(400).json({ 
-        message: "too small name",
-        received: name 
+        message: "too small name"
       });
     }
     
     if (!cpf_cnpj || cpf_cnpj.length < 11) {
       return res.status(400).json({ 
-        message: "too small cpf_cnpj",
-        received: cpf_cnpj 
+        message: "too small cpf_cnpj"
       });
     }
-    
+
     try {
-      const client = await Client.create({
-        name: name,
-        cpf_cnpj: cpf_cnpj
+      const client = await database.query({
+        text: `INSERT INTO clients (name, cpf_cnpj, created_at)
+        VALUES ($1, $2, CURRENT_TIMESTAMP) RETURNING *`,
+        values: [name, cpf_cnpj]
       });
     
       return res.status(201).json({
@@ -36,8 +35,7 @@ export const addClient = async (req, res) => {
       console.error(error);
 
       return res.status(500).json({
-        message: "Internal server error",
-        client: result[0]
+        message: "Internal server error"
       });
     }
     
@@ -48,7 +46,7 @@ export const addClient = async (req, res) => {
 
 export const getAllClients = async (req, res) => {
   try {
-    const dbClients = await database.query("SELECT * FROM equips;");
+    const dbClients = await database.query("SELECT * FROM clients;");
     const clients = dbClients.rows;
 
     res.status(200).json({
@@ -90,19 +88,26 @@ export const addEquip = async (req, res) => {
   try {
     const {name, serial_num, client_id} = req.body;
 
-    const client = await Client.findByPk(client_id);
+    const clientUsed = await database.query(`
+      SELECT * FROM clients
+      JOIN equips ON equips.client_id = clients.id
+      WHERE client_id = ${client_id};
+      `);
 
-    if(!client) {
+    if(!clientUsed.rows) {
+
       return res.status(404).json({
         message: "Client not found"
       });
     };
 
-    const equip = await Equip.create({
-      name: name.trim(),
-      serial_num: serial_num.trim(),
-      client_id: client_id
-    });
+    console.log("CLIENTE EXISTE: ", clientUsed);
+
+    // const equip = await database.query({
+    //     text: `INSERT INTO equips (name,)
+    //     VALUES ($1, $2, CURRENT_TIMESTAMP) RETURNING *`,
+    //     values: [name, ]
+    //   });
 
     return res.status(201).json({
       success: true,
