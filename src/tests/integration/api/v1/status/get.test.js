@@ -1,4 +1,3 @@
-
 describe("GET /status", () => {
   describe("Anonymous user", () => {
     test("Retrieving current system status", async () => {

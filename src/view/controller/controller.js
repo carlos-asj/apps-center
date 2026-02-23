@@ -48,9 +48,14 @@ export const addClient = async (req, res) => {
 
 export const getAllClients = async (req, res) => {
   try {
-    const clients = await Client.findAll();
+    const dbClients = await database.query("SELECT * FROM equips;");
+    const clients = dbClients.rows;
 
-    res.status(200).json({ clients });
+    res.status(200).json({
+      success: true,
+      count: clients.length,
+      data: clients
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -115,14 +120,8 @@ export const addEquip = async (req, res) => {
 
 export const getAllEquip = async (req, res) => {
   try {
-    const equips = await Equip.findAll({
-      include: [{
-        model: Client,
-        as: 'client',
-        attributes: ['id', 'name', 'cpf_cnpj']
-      }],
-      order: [['id', 'ASC']]
-    });
+    const dbEquips = await database.query("SELECT * FROM equips ORDER BY id ASC;")
+    const equips = dbEquips.rows;
 
     if (equips.length == 0) {
       return res.status(200).json({
