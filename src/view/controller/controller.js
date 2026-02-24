@@ -8,7 +8,6 @@ export const addClient = async (req, res) => {
   
     if (!cpf_cnpj){
       return res.status(400).json({
-        success: false,
         message: "CPF or CNPJ are required"
       });
     }else if (!name || name.length < 3) {
@@ -78,6 +77,39 @@ export const getAllClients = async (req, res) => {
     });
   }
 };
+
+export const deleteClient = async (req, res) => {
+  let clientId = req.params.clientId;
+
+  try {
+    const findClient = await database.query({
+      text: `SELECT * FROM clients WHERE id = $1`,
+      values: [clientId]
+    });
+
+    if (findClient.rowCount === 0) {
+      return res.status(404).json({
+        message: "Client not found",
+      });
+    }
+
+    await database.query({
+      text: `DELETE FROM clients WHERE id = $1`,
+      values: [clientId]
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Client deleted"
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+}
 
 export const getClient = async (req, res) => {
   const clienteId = req.params.cliente_id;
@@ -247,25 +279,31 @@ export const updateEquip = async (req, res) => {
 };
 
 export const deleteEquip = async (req, res) => {
-  let equip_id = req.params.equip_id;
+  let equipId = req.params.equipId;
+
   try {
-    const equip = await EquipModel.findOne({
-      where: { equip_id: equip_id },
+    const findEquip = await database.query({
+      text: `SELECT * FROM equips WHERE id = $1`,
+      values: [equipId]
     });
 
-    if (equip == null) {
+    if (findEquip.rowCount === 0) {
       return res.status(404).json({
-        message: "Equipamento não encontrado",
+        message: "Equipment not found",
       });
     }
 
-    await equip.destroy();
+    await database.query({
+      text: `DELETE FROM equips WHERE id = $1`,
+      values: [equipId]
+    });
+
     return res.status(200).json({
-      message: "Equipamento deletado",
+      success: true,
+      message: "Equipment deleted"
     });
   } catch (error) {
     console.error(error);
-
     return res.status(500).json({
       message: "Internal server error",
     });

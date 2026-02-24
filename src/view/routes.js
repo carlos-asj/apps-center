@@ -3,6 +3,7 @@ import {
   addClient,
   getAllClients,
   getClient,
+  deleteClient,
   addEquip,
   getAllEquip,
   getEquipId,
@@ -23,7 +24,8 @@ router.post("/clients", addClient);
 
 router.put("/equip/:equip_id", updateEquip);
 
-router.delete("/equip/:equip_id", deleteEquip);
+router.delete("/clients/:clientId", deleteClient);
+router.delete("/equips/:equipId", deleteEquip);
 
 router.get("/status", status);
 
