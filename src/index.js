@@ -14,6 +14,7 @@ try {
 
   app.listen(PORT, () => {
     console.log(`App listening on port ${PORT}`);
+    console.log(`Access http://localhost:${PORT}\n`);
   });
 
 } catch (error) {

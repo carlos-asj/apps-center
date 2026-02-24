@@ -6,29 +6,46 @@ export const addClient = async (req, res) => {
   try {
     const {name, cpf_cnpj} = req.body;
   
-    if (!name || name.length < 3) {
+    if (!cpf_cnpj){
+      return res.status(400).json({
+        success: false,
+        message: "CPF or CNPJ are required"
+      });
+    }else if (!name || name.length < 3) {
       return res.status(400).json({ 
         message: "too small name"
       });
-    }
-    
-    if (!cpf_cnpj || cpf_cnpj.length < 11) {
+    } else if (!cpf_cnpj || cpf_cnpj.length < 11) {
       return res.status(400).json({ 
         message: "too small cpf_cnpj"
       });
     }
 
     try {
+      const keyUsed = await database.query({
+        text: `SELECT * FROM clients WHERE cpf_cnpj = $1`,
+        values: [cpf_cnpj]
+      });
+
+      if (keyUsed.rowCount != 0) {
+        return res.status(500).json({
+          success: false,
+          message: "Client already exist"
+        });
+      };
+
       const client = await database.query({
         text: `INSERT INTO clients (name, cpf_cnpj, created_at)
         VALUES ($1, $2, CURRENT_TIMESTAMP) RETURNING *`,
         values: [name, cpf_cnpj]
       });
+
+      const clientFormated = client.rows[0];
     
       return res.status(201).json({
         success: true,
         message: "Client created!",
-        client: { client }
+        client: { clientFormated }
       });
       
     } catch (error) {
@@ -88,31 +105,53 @@ export const addEquip = async (req, res) => {
   try {
     const {name, serial_num, client_id} = req.body;
 
-    const clientUsed = await database.query(`
-      SELECT * FROM clients
-      JOIN equips ON equips.client_id = clients.id
-      WHERE client_id = ${client_id};
-      `);
+    const clientUsed = await database.query({
+      text: `SELECT * FROM clients WHERE id = $1`,
+      values: [client_id]
+    });
 
-    if(!clientUsed.rows) {
+    const serialUsed = await database.query({
+      text: `SELECT serial_num FROM equips WHERE serial_num = $1`,
+      values: [serial_num]
+    });
 
+    if(serialUsed.rowCount != 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Serial number already registered"
+      });
+    };
+
+    if(clientUsed.rowCount === 0) {
       return res.status(404).json({
         message: "Client not found"
       });
     };
 
-    console.log("CLIENTE EXISTE: ", clientUsed);
-
-    // const equip = await database.query({
-    //     text: `INSERT INTO equips (name,)
-    //     VALUES ($1, $2, CURRENT_TIMESTAMP) RETURNING *`,
-    //     values: [name, ]
-    //   });
+    const equip = await database.query({
+        text: `INSERT INTO equips (name, serial_num, client_id)
+        VALUES ($1, $2, $3)
+        RETURNING 
+          equips.id,
+          equips.name,
+          equips.serial_num,
+          equips.client_id,
+          equips.created_at,
+          equips.updated_at,
+          (
+            SELECT row_to_json(clients) 
+            FROM clients 
+            WHERE clients.id = equips.client_id
+          ) as client`,
+        values: [name, serial_num, client_id]
+      });
+      
+    const equipFormatted = equip.rows[0];
 
     return res.status(201).json({
       success: true,
       message: "Equipment created",
-      data: { equip }
+      data: { equipFormatted }
     });
 
   } catch (error) {
