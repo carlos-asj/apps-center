@@ -2,7 +2,7 @@ import express from "express";
 import {
   addClient,
   getAllClients,
-  getClient,
+  getClientId,
   deleteClient,
   addEquip,
   getAllEquip,
@@ -15,14 +15,15 @@ import {
 const router = express.Router();
 
 router.get("/equips", getAllEquip);
-router.get("/equips/:equip_id", getEquipId);
+router.get("/equip/:equipId", getEquipId);
 router.get("/clients", getAllClients);
-router.get("/clients/:client_id", getClient);
+router.get("/client/:clientId", getClientId);
 
 router.post("/equips", addEquip);
 router.post("/clients", addClient);
 
-router.put("/equip/:equip_id", updateEquip);
+router.put("/equip/:equipId", updateEquip);
+//router.put("/client/:clientId", updateClient);
 
 router.delete("/clients/:clientId", deleteClient);
 router.delete("/equips/:equipId", deleteEquip);

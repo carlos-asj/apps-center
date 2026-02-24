@@ -111,20 +111,27 @@ export const deleteClient = async (req, res) => {
   }
 }
 
-export const getClient = async (req, res) => {
-  const clienteId = req.params.cliente_id;
+export const getClientId = async (req, res) => {
+  const clientId = req.params.clientId;
+
   try {
-    const clienteEncontrado = await ClientesModel.findOne({
-      where: { cliente_id: clienteId },
+    const findClient = await database.query({
+      text:`SELECT * FROM clients WHERE id = $1`,
+      values: [clientId]
     });
 
-    if (!clienteEncontrado) {
+    if (findClient.rowCount === 0) {
       return res.status(404).json({
-        message: "Cliente não encontrado",
+        message: "Client not found",
       });
     }
 
-    return res.status(200).json({ clienteEncontrado });
+    const formattedClient = findClient.rows[0]
+
+    return res.status(200).json({
+      success: true,
+      client: formattedClient
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -196,7 +203,19 @@ export const addEquip = async (req, res) => {
 
 export const getAllEquip = async (req, res) => {
   try {
-    const dbEquips = await database.query("SELECT * FROM equips ORDER BY id ASC;")
+    const dbEquips = await database.query({
+      text: `SELECT 
+          equips.id,
+          equips.name,
+          equips.serial_num,
+          equips.created_at,
+          equips.updated_at,
+          json_build_object(
+          'name', clients.name,
+          'cpf_cnpj', clients.cpf_cnpj) as client
+        FROM equips
+        JOIN clients ON clients.id = equips.client_id`
+    });
     const equips = dbEquips.rows;
 
     if (equips.length == 0) {
@@ -220,21 +239,37 @@ export const getAllEquip = async (req, res) => {
 };
 
 export const getEquipId = async (req, res) => {
-  const equipId = req.params.equip_id;
-  console.log("equipId:", equipId);
+  const equipId = req.params.equipId;
+
   try {
-    const equip = await EquipModel.findOne({
-      where: { equip_id: equipId },
+    const findEquip = await database.query({
+      text: `SELECT 
+          equips.id,
+          equips.name,
+          equips.serial_num,
+          equips.created_at,
+          equips.updated_at,
+          json_build_object(
+          'name', clients.name,
+          'cpf_cnpj', clients.cpf_cnpj) as client
+        FROM equips
+        JOIN clients ON clients.id = equips.client_id
+        WHERE equips.id = $1`,
+      values: [equipId]
     });
 
-    if (!equip) {
+    if (findEquip.rowCount === 0) {
       return res.status(404).json({
-        message: "Nenhum equipamento encontrado",
+        success: false,
+        message: "Equipment not found",
       });
-    }
+    };
+
+    const formattedEquip = findEquip.rows[0];
 
     return res.status(200).json({
-      equipamento: equip,
+      success: true,
+      equipment: formattedEquip,
     });
   } catch (error) {
     console.error(error);
@@ -255,10 +290,27 @@ async function gerar_linkrtsp(usuario, senha, publico, rtsp) {
 }
 
 export const updateEquip = async (req, res) => {
-  let equip_id = req.params.equip_id;
+  let equipId = req.params.equipId;
+  const updates = req.body;
   try {
-    const equip = await EquipModel.update(req.body, {
-      where: { equip_id },
+    const findEquip = await database.query({
+      text: `SELECT * FROM equips WHERE id = $1`,
+      values: [equipId]
+    });
+
+    if (findEquip.rowCount === 0){
+      return res.status(404).json({
+        success: false,
+        message: "Equipment not found"
+      });
+    };
+    
+    const {name, serial_num, client_id} = req.body;
+
+    const putEquip = await database.query({
+      text: `ALTER TABLE equips
+      ALTER COLUMN name`,
+      values: []
     });
 
     const resEquip = await EquipModel.findOne({
