@@ -292,7 +292,15 @@ async function gerar_linkrtsp(usuario, senha, publico, rtsp) {
 export const updateEquip = async (req, res) => {
   let equipId = req.params.equipId;
   const updates = req.body;
+
   try {
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No fields to update"
+      });
+    }
+
     const findEquip = await database.query({
       text: `SELECT * FROM equips WHERE id = $1`,
       values: [equipId]
@@ -304,22 +312,80 @@ export const updateEquip = async (req, res) => {
         message: "Equipment not found"
       });
     };
-    
-    const {name, serial_num, client_id} = req.body;
+
+    const setParams = [];
+    const values = [];
+    let idxParam = 1;
+
+    if (updates.name !== undefined) {
+      setParams.push(`name = $${idxParam}`);
+      values.push(updates.name);
+      idxParam++;
+    };
+
+    if (updates.serial_num !== undefined) {
+      setParams.push(`serial_num = $${idxParam}`);
+      values.push(updates.serial_num);
+      idxParam++;
+    };
+
+    if (updates.client_id !== undefined) {
+      const findClient = await database.query({
+        text: `SELECT * FROM clients WHERE id = $1`,
+        values: [updates.client_id]
+      });
+
+      if (findClient.rowCount === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Client no found"
+        });
+      };
+
+      setParams.push(`client_id = $${idxParam}`);
+      values.push(updates.client_id);
+      idxParam++;
+    };
+
+    setParams.push(`updated_at = CURRENT_TIMESTAMP`);
+
+    values.push(equipId);
+
+    const queryTxt = `
+      UPDATE equips
+      SET ${setParams.join(', ')}
+      WHERE id = $${idxParam}
+      RETURNING *
+    `;
 
     const putEquip = await database.query({
-      text: `ALTER TABLE equips
-      ALTER COLUMN name`,
-      values: []
+      text: queryTxt,
+      values: values
     });
 
-    const resEquip = await EquipModel.findOne({
-      where: { equip_id },
-    });
+    const formattedEquip = await database.query({
+      text: `SELECT 
+          equips.id,
+          equips.name,
+          equips.serial_num,
+          equips.created_at,
+          equips.updated_at,
+          json_build_object(
+            'id', clients.id,
+            'name', clients.name,
+            'cpf_cnpj', clients.cpf_cnpj
+          ) as client
+        FROM equips
+        JOIN clients ON clients.id = equips.client_id
+        WHERE equips.id = $1
+        `,
+        values: [equipId]
+    })
 
     return res.status(200).json({
-      message: "Equipamento atualizado com sucesso",
-      equipamento: resEquip.name,
+      success: true,
+      message: "Equipment updated",
+      equip: formattedEquip.rows[0]
     });
   } catch (error) {
     console.error(error);
