@@ -235,7 +235,7 @@ export const updateClient = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Equipment updated",
+      message: "Client updated",
       equip: formattedClient.rows[0]
     });
   } catch (error) {

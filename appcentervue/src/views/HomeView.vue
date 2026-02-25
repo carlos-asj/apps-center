@@ -14,12 +14,8 @@ function irParaEquipamentos() {
     <div>
       <div>
         <h1>HOME</h1>
-        <h2>Equipamentos</h2>
         <div>
-          <!-- Botão com link direto -->
-          <router-link to="/equipments">
-            Ver Equipamentos
-          </router-link>
+          Página inicial
         </div>
       </div>
     </div>

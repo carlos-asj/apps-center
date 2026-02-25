@@ -31,9 +31,6 @@
 </script>
 
 <template>
-  <button @click="backHome">
-    ← Voltar para Home
-  </button>
   <h1>APP CENTER</h1>
   <div class="container">
     <h1>Equipments list</h1>
