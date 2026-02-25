@@ -355,8 +355,16 @@ export const getAllEquip = async (req, res) => {
     const dbEquips = await database.query({
       text: `SELECT 
           equips.id,
-          equips.name,
+          equips.description,
           equips.serial_num,
+          equips.link_rtsp,
+          equips.mac,
+          equips.ip_local,
+          equips.ip_publico,
+          equips.login,
+          equips.password,
+          equips.http_port,
+          equips.rtsp_port,
           equips.created_at,
           equips.updated_at,
           json_build_object(

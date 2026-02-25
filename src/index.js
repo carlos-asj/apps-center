@@ -1,11 +1,12 @@
 import express from "express";
 import "dotenv/config";
 import router from "./view/routes.js";
-import { setupDatabase } from "./infra/model/index.js";
+import cors from "cors";
 
 const PORT = process.env.PORT;
 const app = express();
 
+app.use(cors())
 app.use(express.json());
 
 try {
