@@ -4,7 +4,7 @@ import database from "../../infra/dbConnectPsql.js";
 export const addClient = async (req, res) => {
   
   try {
-    const {name, cpf_cnpj} = req.body;
+    const {name, cpf_cnpj, email, tel, localization} = req.body;
   
     if (!cpf_cnpj){
       return res.status(400).json({
@@ -34,9 +34,9 @@ export const addClient = async (req, res) => {
       };
 
       const client = await database.query({
-        text: `INSERT INTO clients (name, cpf_cnpj, created_at)
-        VALUES ($1, $2, CURRENT_TIMESTAMP) RETURNING *`,
-        values: [name, cpf_cnpj]
+        text: `INSERT INTO clients (name, cpf_cnpj, email, tel, localization)
+        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+        values: [name, cpf_cnpj, email, tel, localization]
       });
 
       const clientFormated = client.rows[0];
@@ -109,7 +109,7 @@ export const deleteClient = async (req, res) => {
       message: "Internal server error",
     });
   }
-}
+};
 
 export const getClientId = async (req, res) => {
   const clientId = req.params.clientId;
@@ -140,14 +140,137 @@ export const getClientId = async (req, res) => {
   }
 };
 
+export const updateClient = async (req, res) => {
+  let clientId = req.params.clientId;
+  const updates = req.body;
+
+  try {
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No fields to update"
+      });
+    }
+
+    const findClient = await database.query({
+      text: `SELECT * FROM clients WHERE id = $1`,
+      values: [clientId]
+    });
+
+    if (findClient.rowCount === 0){
+      return res.status(404).json({
+        success: false,
+        message: "Client not found"
+      });
+    };
+
+    // dynamic selection of the parameters to update
+    const setParams = [];
+    const values = [];
+    let idxParam = 1;
+
+    if (updates.name !== undefined) {
+      setParams.push(`name = $${idxParam}`);
+      values.push(updates.name);
+      idxParam++;
+    };
+
+    if (updates.cpf_cnpj !== undefined) {
+      setParams.push(`cpf_cnpj = $${idxParam}`);
+      values.push(updates.cpf_cnpj);
+      idxParam++;
+    };
+
+    if (updates.email !== undefined) {
+      const findEmail = await database.query({
+        text: `SELECT * FROM clients WHERE email = $1`,
+        values: [updates.email]
+      });
+
+      if (findEmail.rowCount != 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already exists"
+        });
+      };
+
+      setParams.push(`email = $${idxParam}`);
+      values.push(updates.email);
+      idxParam++;
+    };
+
+    if (updates.tel !== undefined) {
+      setParams.push(`tel = $${idxParam}`);
+      values.push(updates.tel);
+      idxParam++;
+    };
+
+    if (updates.localization !== undefined) {
+      setParams.push(`localization = $${idxParam}`);
+      values.push(updates.localization);
+      idxParam++;
+    };
+
+    setParams.push(`updated_at = CURRENT_TIMESTAMP`);
+
+    values.push(clientId);
+
+    // query concatenated
+    const queryTxt = `
+      UPDATE clients
+      SET ${setParams.join(', ')}
+      WHERE id = $${idxParam}
+      RETURNING *
+    `;
+
+    const putClient = await database.query({
+      text: queryTxt,
+      values: values
+    });
+
+    const formattedClient = await database.query({
+      text: `SELECT * FROM clients WHERE id = $1`,
+      values: [clientId]
+    })
+
+    return res.status(200).json({
+      success: true,
+      message: "Equipment updated",
+      equip: formattedClient.rows[0]
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+}
+
 export const addEquip = async (req, res) => {
   try {
-    const {name, serial_num, client_id} = req.body;
+    const {description,
+      serial_num,
+      link_rtsp,
+      mac,
+      ip_local,
+      ip_publico,
+      login,
+      password,
+      http_port,
+      rtsp_port,
+      client_id} = req.body;
 
     const clientUsed = await database.query({
       text: `SELECT * FROM clients WHERE id = $1`,
       values: [client_id]
     });
+
+    if(clientUsed.rowCount === 0) {
+      return res.status(404).json({
+        message: "Client not found"
+      });
+    };
 
     const serialUsed = await database.query({
       text: `SELECT serial_num FROM equips WHERE serial_num = $1`,
@@ -161,19 +284,35 @@ export const addEquip = async (req, res) => {
       });
     };
 
-    if(clientUsed.rowCount === 0) {
-      return res.status(404).json({
-        message: "Client not found"
-      });
-    };
+    const link = await get_linkRtsp(login, password, ip_publico, rtsp_port);
 
     const equip = await database.query({
-        text: `INSERT INTO equips (name, serial_num, client_id)
-        VALUES ($1, $2, $3)
+        text: `INSERT INTO equips (
+        description,
+        serial_num,
+        link_rtsp,
+        mac,
+        ip_local,
+        ip_publico,
+        login,
+        password,
+        http_port,
+        rtsp_port,
+        client_id
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING 
           equips.id,
-          equips.name,
+          equips.description,
           equips.serial_num,
+          equips.link_rtsp,
+          equips.mac,
+          equips.ip_local,
+          equips.ip_publico,
+          equips.login,
+          equips.password,
+          equips.http_port,
+          equips.rtsp_port,
           equips.client_id,
           equips.created_at,
           equips.updated_at,
@@ -182,7 +321,17 @@ export const addEquip = async (req, res) => {
             FROM clients 
             WHERE clients.id = equips.client_id
           ) as client`,
-        values: [name, serial_num, client_id]
+        values: [description,
+          serial_num,
+          link,
+          mac,
+          ip_local,
+          ip_publico,
+          login,
+          password,
+          http_port,
+          rtsp_port,
+          client_id]
       });
       
     const equipFormatted = equip.rows[0];
@@ -199,7 +348,7 @@ export const addEquip = async (req, res) => {
       message: "Internal server error"
     });
   };
-}
+};
 
 export const getAllEquip = async (req, res) => {
   try {
@@ -279,9 +428,9 @@ export const getEquipId = async (req, res) => {
   }
 };
 
-async function gerar_linkrtsp(usuario, senha, publico, rtsp) {
+async function get_linkRtsp(login, password, ip_publico, rtsp_port) {
   try {
-    const link_rtsp = `rtsp://${usuario}:${senha}@${publico}:${rtsp}/cam/realmonitor?channel=1&subtype=0`;
+    const link_rtsp = `rtsp://${login}:${password}@${ip_publico}:${rtsp_port}/cam/realmonitor?channel=1&subtype=0`;
     return link_rtsp;
   } catch (error) {
     console.error(error);
@@ -313,6 +462,7 @@ export const updateEquip = async (req, res) => {
       });
     };
 
+    // dynamic selection of the parameters to update
     const setParams = [];
     const values = [];
     let idxParam = 1;
@@ -338,7 +488,7 @@ export const updateEquip = async (req, res) => {
       if (findClient.rowCount === 0) {
         return res.status(404).json({
           success: false,
-          message: "Client no found"
+          message: "Client not found"
         });
       };
 
@@ -351,6 +501,7 @@ export const updateEquip = async (req, res) => {
 
     values.push(equipId);
 
+    // query concatenated
     const queryTxt = `
       UPDATE equips
       SET ${setParams.join(', ')}

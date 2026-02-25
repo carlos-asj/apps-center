@@ -9,6 +9,9 @@ try {
           id SERIAL PRIMARY KEY,
           name VARCHAR(100) NOT NULL,
           cpf_cnpj VARCHAR(18) UNIQUE NOT NULL,
+          email VARCHAR(255),
+          tel VARCHAR(14),
+          localization VARCHAR(255),
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );`
@@ -18,8 +21,16 @@ try {
   const equipsTable = await database.query(`
     CREATE TABLE IF NOT EXISTS equips (
           id SERIAL PRIMARY KEY,
-          name VARCHAR(100) NOT NULL,
+          description VARCHAR(255) NOT NULL,
           serial_num VARCHAR(255) UNIQUE NOT NULL,
+          link_rtsp VARCHAR(255),
+          mac VARCHAR(18),
+          ip_local VARCHAR(16),
+          ip_publico VARCHAR(20),
+          login VARCHAR(255),
+          password VARCHAR(255),
+          http_port INTEGER,
+          rtsp_port INTEGER,
           client_id INTEGER NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
