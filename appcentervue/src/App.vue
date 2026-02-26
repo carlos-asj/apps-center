@@ -2,6 +2,7 @@
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 
+
 const route = useRoute()
 
 const rotaAtual = computed(() => route.path)
@@ -13,7 +14,11 @@ function isActive(path) {
 
 <template>
   <div class="app">
-    <nav :class="['sidebar', { 'sidebar-expanded': isExpanded }]">
+    <nav
+    :class="['sidebar', { 'sidebar-expanded': isExpanded }]"
+    class="elevation-3
+    v-expand-transition"
+    >
       <div class="sidebar-header">
         <button
         @click="toggleSidebar"
@@ -22,16 +27,25 @@ function isActive(path) {
           <span v-else>⭐</span>
         </button>
         <span v-if="isExpanded" class="logo-icon"></span>
-        <h3 v-if="isExpanded" class="logo-text" style="position: fixed;">APP Ayel</h3>
+        <h3 v-if="isExpanded"
+        class="logo-text v-expand-transition"
+        style="position: fixed;">Ayel</h3>
       </div>
       <ul class="sidebar-menu">
-        <li v-for="item in menuItems" :key="item.path">
+        <li>
           <router-link
-          :to="item.path"
-          class="menu-item"
-          :class="{ 'active': $route.path === item.path }">
-            <span class="menu-icon">{{ item.icon }}</span>
-            <span v-if="isExpanded" class="menu-text">{{ item.text }}</span>
+          :to="'/'"
+          class="menu-item">
+            <span class="menu-icon">🏠</span>
+            <span v-if="isExpanded" class="menu-text">Home</span>
+          </router-link>
+        </li>
+        <li>
+          <router-link
+          to="/equipments"
+          class="menu-item">
+            <span class="menu-icon">📡</span>
+            <span v-if="isExpanded" class="menu-text">Equipments List</span>
           </router-link>
         </li>
       </ul>
@@ -56,10 +70,6 @@ export default {
   data() {
     return {
       isExpanded: false,
-      menuItems: [
-        { path: '/', icon: '🏠', text: 'Home' },
-        { path: '/equipments', icon: '📡', text: 'Equipments List'}
-      ]
     }
   },
   methods: {
@@ -81,17 +91,17 @@ export default {
 .app {
   display: flex;
   min-height: 100vh;
+  background-color: #f9f9f9;
 }
 
 .sidebar {
-  background: aliceblue;
+  background-color: #f9f9f9;
   transition: width 0.3s ease;
   width: 60px;
   display: flex;
   flex-direction: column;
   position: fixed;
   height: 100vh;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   z-index: 100;
 }
 
@@ -105,6 +115,7 @@ export default {
   display: flex;
   align-items: center;
   border-bottom: 1px solid black;
+  color: black;
 }
 
 .toggle-btn {
@@ -117,7 +128,7 @@ export default {
 }
 
 .toggle-btn-expanded {
-  margin-left: 200px;
+  margin-left: 190px;
 }
 
 .logo-text {
@@ -182,6 +193,7 @@ export default {
 
 /* Conteúdo principal */
 .content {
+  color: black;
   flex: 1;
   margin-left: 70px;
   transition: margin-left 0.3s ease;
@@ -189,7 +201,7 @@ export default {
 }
 
 .content-expanded {
-  margin-left: 250px;
+  margin-left: 260px;
 }
 
 .content-header {
