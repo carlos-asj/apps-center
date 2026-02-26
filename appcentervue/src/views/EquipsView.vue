@@ -31,7 +31,6 @@
 </script>
 
 <template>
-  <h1>APP CENTER</h1>
   <div class="container">
     <h1>Equipments list</h1>
     <div v-if="isLoading" class="loading">

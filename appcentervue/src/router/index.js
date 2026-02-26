@@ -5,13 +5,13 @@ import EquipsView from '../views/EquipsView.vue'
 const routes = [
   {
     path: '/',
-    name: 'home',
+    name: 'Home',
     component: HomeView,
     meta: { title: 'Home Page' }
   },
   {
     path: '/equipments',
-    name: 'equipments',
+    name: 'Equipments',
     component: EquipsView,
     meta: { title: 'List of equipments' }
   },
