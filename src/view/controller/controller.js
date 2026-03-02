@@ -259,11 +259,15 @@ export const addEquip = async (req, res) => {
       password,
       http_port,
       rtsp_port,
-      client_id} = req.body;
+      client_id} = req.body.formattedData;
+
+      const http_portValue = http_port === '' ? null : http_port;
+      const rtsp_portValue = rtsp_port === '' ? null : rtsp_port;
+      const client_idValue = client_id === '' ? null : client_id;
 
     const clientUsed = await database.query({
       text: `SELECT * FROM clients WHERE id = $1`,
-      values: [client_id]
+      values: [client_idValue]
     });
 
     if(clientUsed.rowCount === 0) {
@@ -329,9 +333,9 @@ export const addEquip = async (req, res) => {
           ip_publico,
           login,
           password,
-          http_port,
-          rtsp_port,
-          client_id]
+          http_portValue,
+          rtsp_portValue,
+          client_idValue]
       });
       
     const equipFormatted = equip.rows[0];
@@ -371,7 +375,8 @@ export const getAllEquip = async (req, res) => {
           'name', clients.name,
           'cpf_cnpj', clients.cpf_cnpj) as client
         FROM equips
-        JOIN clients ON clients.id = equips.client_id`
+        JOIN clients ON clients.id = equips.client_id
+        ORDER BY equips.updated_at DESC;`
     });
     const equips = dbEquips.rows;
 
