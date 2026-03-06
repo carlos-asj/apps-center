@@ -3,11 +3,6 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-
-// Função para navegar programaticamente
-function irParaEquipamentos() {
-  router.push('/equipments')
-}
 </script>
 <template>
   <div class="home-container">

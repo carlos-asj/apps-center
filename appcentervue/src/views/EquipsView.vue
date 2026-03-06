@@ -1,14 +1,30 @@
 <script setup>
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
+  import EquipsForm from './EquipsForm.vue'
 
-  const route = useRoute()
   const router = useRouter()
-  const equips = ref(null)
+  const equips = ref([])
   const isLoading = ref(false)
   const error = ref(null)
+  const isHovering = ref(false)
+  
+  const isSaving = ref(false)
+  const errorMessage = ref('')
 
-  async function getEquips() {
+  const showForm = ref(false)
+
+  function openForm() {
+    showForm.value = true
+  }
+
+  function closeForm() {
+    showForm.value = false
+
+    equipData.value = { desc: ''}
+  }
+
+  async function fetchEquipsData() {
     try {
       const response = await fetch('http://localhost:3000/equips');
       const responseBody = await response.json();
@@ -16,23 +32,22 @@
       equips.value = responseBody;
       isLoading.value = false;
     } catch (error) {
-      error.value = 'Falha ao carregar os dados: '+ error.message
+      error.value = 'Error loading data: '+ error.message
       isLoading.value = false
     }
   }
 
-  function backHome() {
-    router.push('/')
-  }
-
-  onMounted(async () => {
-    getEquips()
+  onMounted(() => {
+    fetchEquipsData();
   })
 </script>
 
 <template>
   <div class="container">
     <h1>Equipments list</h1>
+    <p>
+      <EquipsForm />
+    </p>
     <div v-if="isLoading" class="loading">
       Loading equipments... 
     </div>
@@ -42,55 +57,46 @@
     </div>
 
     <div v-else-if="equips?.data" class="responseBody">
-      <table>
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th>Serial number</th>
-            <th>MAC Address</th>
-            <th>Local IP</th>
-            <th>Public IP</th>
-            <th>HTTP port</th>
-            <th>RTSP port</th>
-            <th>Login</th>
-            <th>Password</th>
-            <th>RTSP link</th>
-            <th>Client</th>
-            <th>CPF/CNPJ</th>
-            <th>Created at</th>
-            <th>Updated at</th>
-          </tr>
-        </thead>
+      <v-hover v-slot="{ isHovering, props}">
+        <v-card
+        v-bind="props"
+        :elevation="isHovering ? 5 : 10"
+        class="rounded-xl">
+          <v-table>
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Serial number</th>
+                <th>MAC Address</th>
+                <th>Local IP</th>
+                <th>Public IP</th>
+                <th>Client</th>
+                <th>Created at</th>
+                <th>Updated at</th>
+              </tr>
+            </thead>
 
-        <tbody>
-          <tr v-for="equip in equips.data" :key="equip.id" class="equip-card">
-            <td>{{ equip.description }}</td>
-            <td>{{ equip.serial_num }}</td>
-            <td>{{ equip.mac }}</td>
-            <td>{{ equip.ip_local }}</td>
-            <td>{{ equip.ip_publico }}</td>
-            <td>{{ equip.http_port }}</td>
-            <td>{{ equip.rtsp_port }}</td>
-            
-            <td>{{ equip.login }}</td>
-            <td>{{ equip.password }}</td>
+            <tbody>
+              <tr v-for="equip in equips.data" :key="equip.id" class="equip-card">
+                <td>{{ equip.description }}</td>
+                <td>{{ equip.serial_num }}</td>
+                <td>{{ equip.mac }}</td>
+                <td>{{ equip.ip_local }}</td>
+                <td>{{ equip.ip_publico }}</td>
+                <td>{{ equip.client.name }}</td>
+                <td>{{ new Date(equip.created_at).toLocaleString('pt-BR') }}</td>
+                <td>{{ new Date(equip.updated_at).toLocaleString('pt-BR') }}</td>
+              </tr>
+            </tbody>
 
-            <td class="abreviation">
-              <a :href="equip.link_rtsp" target="_blank">{{ equip.link_rtsp }}</a>
-            </td>
-            <td>{{ equip.client.name }}</td>
-            <td>{{ equip.client.cpf_cnpj }}</td>
-            <td>{{ new Date(equip.created_at).toLocaleString('pt-BR') }}</td>
-            <td>{{ new Date(equip.updated_at).toLocaleString('pt-BR') }}</td>
-          </tr>
-        </tbody>
-
-      </table>
-
+          </v-table>
+        </v-card>
+      </v-hover>
+      
     </div>
 
     <div v-else class="sem-dados">
-      📭 Nenhum equipamento encontrado
+      Nenhum equipamento encontrado
     </div>
 
   </div>
@@ -104,20 +110,22 @@
     font-family: Arial, sans-serif;
   }
 
-  table {
-    width: 100%;
-    table-layout: fixed;
+  th {
+    text-align: center;
+    font-weight: bold;
+
+    background-color: rgb(204, 204, 204);
   }
 
   td {
     text-align: center;
     font-size: small;
+
+    border-bottom: 2px solid rgb(196, 196, 196);
   }
 
-  .abreviation {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .tbl {
+    border-collapse: collapse;
   }
 
   .loading {
