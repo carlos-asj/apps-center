@@ -2,7 +2,11 @@
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 
+<<<<<<< Updated upstream
 import Sidebar from './components/Sidebar.vue';
+=======
+import Sidebar from './components/sidebar/Sidebar.vue';
+>>>>>>> Stashed changes
 
 const route = useRoute()
 
@@ -23,6 +27,7 @@ function isActive(path) {
   }
 </script>
 
+<<<<<<< Updated upstream
 <template>
   <div class="container">
     <Sidebar />
@@ -42,5 +47,23 @@ function isActive(path) {
 <style scoped>
 .container {
   margin-left: 80px;
+=======
+<script>
+</script>
+
+<template>
+  <Sidebar />
+  <div
+  style="margin-left: 90px;">
+    <router-view />
+  </div>
+  
+</template>
+
+<style>
+* {
+    background-color: white;
+    color:black
+>>>>>>> Stashed changes
 }
 </style>
